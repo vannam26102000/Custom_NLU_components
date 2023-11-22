@@ -1,0 +1,48 @@
+language: vi
+pipeline:
+- name: featurizers.spacy_utils.SpacyNLP
+  model: vi_core_news_lg
+- name: featurizers.spacy_tokenizer.SpacyTokenizer
+- name: featurizers.spacy_featurizer.SpacyFeaturizer
+- name: featurizers.regex_featurizer.RegexFeaturizer
+- name: extractors.regex_entity_extractor.RegexEntityExtractor
+  case_sensitive: False
+  use_lookup_tables: True
+  use_regexes: True
+  use_word_boundaries: True
+- name: featurizers.count_vectors_featurizer.CountVectorsFeaturizer
+  analyzer: char_wb
+  min_ngram: 1
+  max_ngram: 4
+# - name:classifiers.diet_classifier.DIETClassifier
+#   BILOU_flag: false
+#   epochs: 20
+#   batch_size: [128, 256]
+#   entity_recognition: False
+#   tensorboard_log_directory: resources/logs
+#   tensorboard_log_level: "epoch"
+#   learning_rate: 0.0001
+#   random_seed: 666
+#   scale_loss: True
+#   constrain_similarities: True
+
+- name: classifiers.transformer_classifier.TransformerClassifier
+  model_name: "vinai/phobert-base"
+  epochs: 15
+  batch_size: 16
+  learning_rate: 0.00002
+  warmup_steps: 500
+  weight_decay: 0.01
+  scheduler_type: "constant"
+  max_length: 64
+# - name: classifiers.svm_classifier.CustomIntentSVM
+#   kernel: "linear"
+#   coef0: 1
+#   degree: 2
+#   class_weight: "balanced"
+policies:
+- name: core.policies.graph_policy.GraphPolicy
+  confidence_threshold: 0.5
+  confidence_threshold_short_message: 0.6
+  fallback_intents:
+  - intent_fallback
